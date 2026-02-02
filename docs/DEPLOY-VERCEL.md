@@ -41,12 +41,12 @@ git push -u origin main
    - **Framework Preset**: Next.js (já detectado).
    - **Build Command**: `npm run build` (padrão; já usa `prisma generate` e `prisma migrate deploy`).
    - **Output Directory**: deixe padrão.
-5. **Environment Variables** (obrigatório para o banco e opcional para senha):
+5. **Environment Variables** (obrigatório para o banco e para autenticação):
 
    | Nome            | Valor                    | Observação                          |
    |-----------------|--------------------------|-------------------------------------|
    | `DATABASE_URL`  | `postgresql://...`       | URL do PostgreSQL (ver passo 1).    |
-   | `APP_PASSWORD`  | (opcional) sua senha    | Se não definir, o app fica sem login. |
+   | `AUTH_MODE`     | `users`                  | Habilita login/registro por usuário e senha. |
 
    Marque essas variáveis para **Production**, **Preview** e **Development** se for usar em todos.
 
@@ -60,13 +60,13 @@ O primeiro deploy vai:
 ## 4. Depois do deploy
 
 - A URL do app será algo como `https://faturamento-roi-xxx.vercel.app`.
-- Se definiu `APP_PASSWORD`, use essa senha na tela de login.
+- Você poderá **criar conta** e depois fazer login com **usuário/senha**.
 - Novos pushes na branch `main` disparam um novo deploy automaticamente.
 
 ## Resumo
 
 1. Criar PostgreSQL (Vercel Postgres, Neon ou Supabase).  
 2. Criar repositório no GitHub e dar `git push`.  
-3. Na Vercel: importar o repo, configurar `DATABASE_URL` (e opcionalmente `APP_PASSWORD`) e fazer deploy.
+3. Na Vercel: importar o repo, configurar `DATABASE_URL` e `AUTH_MODE=users` e fazer deploy.
 
 Qualquer dúvida sobre o banco, veja `docs/BANCO-DE-DADOS.md`.

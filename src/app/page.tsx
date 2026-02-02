@@ -1,15 +1,14 @@
-import { redirect } from 'next/navigation';
-import { getSession } from '@/lib/auth';
-import { LoginForm } from '@/components/auth/LoginForm';
+import { getAuthMode, getSession } from '@/lib/auth';
+import { EmailAuthForm } from '@/components/auth/EmailAuthForm';
 import { OperationsList } from '@/components/operations/OperationsList';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import Link from 'next/link';
 
 export default async function HomePage() {
-  const hasPassword = !!process.env.APP_PASSWORD;
+  const mode = getAuthMode();
   const session = await getSession();
 
-  if (hasPassword && !session) {
+  if (!session && mode !== 'open') {
     return (
       <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50 p-4">
         <div className="w-full max-w-md">
@@ -17,7 +16,7 @@ export default async function HomePage() {
             <h1 className="text-3xl font-bold text-emerald-800">Faturamento & ROI</h1>
             <p className="text-muted-foreground mt-2">Gestão de faturamento e ROI para sua empresa</p>
           </div>
-          <LoginForm />
+          <EmailAuthForm />
         </div>
       </main>
     );

@@ -105,7 +105,7 @@ faturamento-roi/
 
 ## Fluxo de Uso
 
-1. **Login** (se APP_PASSWORD configurado)
+1. **Login/Registro** (usuário e senha, `AUTH_MODE=users`)
 2. **Listar Operações** → Página inicial
 3. **Criar Operação** → Nome, orçamento diário, conta PIX
 4. **Acessar Operação** → Dashboard com período (7/15/30 dias)
@@ -118,7 +118,7 @@ faturamento-roi/
 
 ## Funcionalidades do MVP
 
-- [x] Autenticação simples por senha (APP_PASSWORD)
+- [x] Autenticação por usuário/senha com registro (`AUTH_MODE=users`)
 - [x] CRUD de Operações
 - [x] Lançamentos diários (gastos e receitas)
 - [x] Categorias de gasto: Ads, IA, Chips, Gastos variáveis
@@ -149,7 +149,7 @@ npm install
 2. Configure o `.env`:
 ```bash
 cp .env.example .env
-# Edite .env: DATABASE_URL (PostgreSQL) e APP_PASSWORD (opcional)
+# Edite .env: DATABASE_URL (PostgreSQL) e AUTH_MODE
 ```
 
 3. Tenha um PostgreSQL (Docker, Neon, Supabase, etc.) e aplique as migrações:
@@ -174,7 +174,7 @@ Resumo:
    git remote add origin https://github.com/SEU_USUARIO/faturamento-roi.git
    git push -u origin main
    ```
-3. Na Vercel: importe o repo, configure `DATABASE_URL` (e opcionalmente `APP_PASSWORD`) e faça o deploy.
+3. Na Vercel: importe o repo, configure `DATABASE_URL` e `AUTH_MODE=users` e faça o deploy.
 
 ## Sugestões de Melhorias Futuras
 

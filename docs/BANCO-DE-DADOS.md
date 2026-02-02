@@ -6,6 +6,10 @@ O projeto usa **Prisma ORM** para falar com o banco. Em **produção (Vercel)** 
 
 ## Fluxo dos dados
 
+0. **Usuários e sessões** (`users`, `sessions`)  
+   Autenticação por **usuário/senha**.  
+   `users` guarda o usuário e o hash da senha; `sessions` guarda tokens de sessão (cookie httpOnly) com expiração.
+
 1. **Operação** (`operations`)  
    Cada “negócio” ou linha que você controla (ex.: Loja A, Canal B).  
    Guarda: nome, orçamento diário, conta PIX, categorias de gasto (JSON).
