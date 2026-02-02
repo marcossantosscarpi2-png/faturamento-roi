@@ -10,8 +10,14 @@ export interface DayStats {
   roi: number | null;
 }
 
+type DailyEntryWithRelations = Awaited<
+  ReturnType<
+    typeof prisma.dailyEntry.findMany<{ include: { expenses: true; revenues: true } }>
+  >
+>[number];
+
 function getStatsFromEntries(
-  entries: Awaited<ReturnType<typeof prisma.dailyEntry.findMany>>,
+  entries: DailyEntryWithRelations[],
   startDate: Date,
   endDate: Date
 ) {
