@@ -1,0 +1,77 @@
+// Sistema de Gestão de Faturamento e ROI
+// Produção (Vercel): PostgreSQL. Local: use PostgreSQL (Docker, Neon, Supabase) ou SQLite (ver README).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Operação: unidade central do sistema (cada negócio/linha independente)
+model Operation {
+  id                 String   @id @default(cuid())
+  name               String
+  dailyBudget         Float    @map("daily_budget")
+  pixAccount         String   @map("pix_account")
+  expenseCategories   String?  @map("expense_categories") // JSON: [{ id, label }]
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  dailyEntries DailyEntry[]
+
+  @@map("operations")
+}
+
+// Lançamento diário: agrupa gastos e receitas por dia e operação
+model DailyEntry {
+  id           String   @id @default(cuid())
+  date         DateTime
+  operationId  String   @map("operation_id")
+  observations String?
+
+  operation Operation @relation(fields: [operationId], references: [id], onDelete: Cascade)
+  expenses  Expense[]
+  revenues  Revenue[]
+
+  @@unique([operationId, date])
+  @@index([operationId])
+  @@index([date])
+  @@map("daily_entries")
+}
+
+// Categorias de gasto: ADS, IA, CHIPS, VARIAVEL
+// SQLite não suporta enum - usamos String
+// Gasto: pode ser diário ou mensal (rateado)
+model Expense {
+  id            String         @id @default(cuid())
+  dailyEntryId  String         @map("daily_entry_id")
+  category      String         // ADS | IA | CHIPS | VARIAVEL
+  amount        Float
+  description   String?
+  isMonthly     Boolean        @default(false) @map("is_monthly")
+  manualAdjust  Float?         @map("manual_adjust")
+  createdAt     DateTime       @default(now()) @map("created_at")
+
+  dailyEntry DailyEntry @relation(fields: [dailyEntryId], references: [id], onDelete: Cascade)
+
+  @@index([dailyEntryId])
+  @@map("expenses")
+}
+
+// Receita: sempre via PIX
+model Revenue {
+  id           String   @id @default(cuid())
+  dailyEntryId String   @map("daily_entry_id")
+  amount       Float
+  description  String?
+  time         String?  // Horário opcional no formato HH:mm
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  dailyEntry DailyEntry @relation(fields: [dailyEntryId], references: [id], onDelete: Cascade)
+
+  @@index([dailyEntryId])
+  @@map("revenues")
+}
