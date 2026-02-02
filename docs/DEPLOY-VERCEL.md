@@ -20,16 +20,17 @@ Guarde essa URL; você vai colocar na Vercel como `DATABASE_URL`.
 
 ## 2. Repositório no GitHub
 
-1. Crie um repositório novo no GitHub (ex.: `faturamento-roi`).
-2. No seu computador, na pasta do projeto, adicione o remote e envie o código:
+O projeto já está com Git inicializado e um commit inicial na branch `main`. Falta só criar o repositório no GitHub e enviar o código.
+
+1. No GitHub: **New repository** → nome (ex.: `faturamento-roi`) → **Create repository** (não marque “Add a README” se o projeto já tiver um).
+2. Na pasta do projeto no seu computador, adicione o remote e faça o push:
 
 ```bash
 git remote add origin https://github.com/SEU_USUARIO/faturamento-roi.git
-git branch -M main
 git push -u origin main
 ```
 
-(Substitua `SEU_USUARIO` pelo seu usuário do GitHub.)
+(Substitua `SEU_USUARIO` pelo seu usuário do GitHub. Se o repo for criado em uma organização, use o nome da organização no lugar de `SEU_USUARIO`.)
 
 ## 3. Projeto na Vercel
 

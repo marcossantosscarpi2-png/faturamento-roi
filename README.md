@@ -169,7 +169,11 @@ Passo a passo completo em **[docs/DEPLOY-VERCEL.md](docs/DEPLOY-VERCEL.md)**.
 
 Resumo:
 1. Crie um PostgreSQL (Vercel Postgres, Neon ou Supabase).
-2. Crie o repositório no GitHub e faça push do código.
+2. Crie o repositório no GitHub (vazio, sem README) e envie o código:
+   ```bash
+   git remote add origin https://github.com/SEU_USUARIO/faturamento-roi.git
+   git push -u origin main
+   ```
 3. Na Vercel: importe o repo, configure `DATABASE_URL` (e opcionalmente `APP_PASSWORD`) e faça o deploy.
 
 ## Sugestões de Melhorias Futuras
