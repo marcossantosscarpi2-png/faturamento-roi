@@ -22,6 +22,7 @@ interface Revenue {
   id: string;
   amount: number | { toNumber?: () => number };
   description: string | null;
+  time: string | null;
 }
 
 interface DailyEntry {
