@@ -45,10 +45,14 @@ git push -u origin main
 
    | Nome            | Valor                    | Observação                          |
    |-----------------|--------------------------|-------------------------------------|
-   | `DATABASE_URL`  | `postgresql://...`       | URL do PostgreSQL (ver passo 1).    |
+   | `DATABASE_URL`  | `postgres://...` (sua URL do PostgreSQL) | Usada pelo Prisma (migrate + runtime). |
    | `AUTH_MODE`     | `users`                  | Habilita login/registro por usuário e senha. |
 
-   Marque essas variáveis para **Production**, **Preview** e **Development** se for usar em todos.
+   Opcional (se usar Prisma Data Platform / mesmo provedor):
+   - `POSTGRES_URL`: mesma URL direta do Postgres (alguns painéis usam esse nome).
+   - `PRISMA_DATABASE_URL`: só se você configurar Prisma Accelerate no `schema.prisma`.
+
+   Marque as variáveis para **Production**, **Preview** e **Development** se for usar em todos.
 
 6. Clique em **Deploy**.
 
