@@ -30,7 +30,7 @@ export function OperationEditForm({
     }
   }, [operation.expenseCategories]);
 
-  const defaultIds = new Set(DEFAULT_EXPENSE_CATEGORIES.map((c) => c.id));
+  const defaultIds = new Set<string>(DEFAULT_EXPENSE_CATEGORIES.map((c) => c.id));
 
   function updateCategoryLabel(index: number, label: string) {
     setCategories((prev) => {
