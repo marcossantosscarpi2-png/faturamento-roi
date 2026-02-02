@@ -203,7 +203,11 @@ export function DashboardChartsClient({ days }: DashboardChartsClientProps) {
                 <XAxis dataKey="dateShort" />
                 <YAxis tickFormatter={(v) => `${v}x`} />
                 <Tooltip
-                  formatter={(v: number | null) => (v !== null ? `${v.toFixed(2)}x` : '—')}
+                  formatter={(v: unknown) => {
+                    if (v == null) return '—';
+                    const n = typeof v === 'number' ? v : Number(v);
+                    return Number.isFinite(n) ? `${n.toFixed(2)}x` : '—';
+                  }}
                   labelFormatter={(_, items) =>
                     items?.[0]?.payload?.date &&
                     new Date(items[0].payload.date).toLocaleDateString('pt-BR')
