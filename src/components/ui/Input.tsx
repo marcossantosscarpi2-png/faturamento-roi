@@ -38,7 +38,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               props.onBlur?.(e);
             }}
             {...props}
-            aria-invalid={showError}
+            aria-invalid={!!showError}
             aria-describedby={showError ? `${props.id}-error` : undefined}
           />
           {showError && (
