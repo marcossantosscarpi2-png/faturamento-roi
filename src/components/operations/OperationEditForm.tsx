@@ -80,7 +80,12 @@ export function OperationEditForm({
     if (!confirm('Excluir esta operação e todos os lançamentos? Esta ação não pode ser desfeita.')) return;
     setDeleting(true);
     try {
-      await deleteOperation(operation.id);
+      const result = await deleteOperation(operation.id);
+      if (result?.error) {
+        toast.error(result.error);
+        setDeleting(false);
+        return;
+      }
       toast.success('Operação excluída com sucesso!');
       window.location.href = '/';
     } catch (err) {

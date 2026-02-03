@@ -1,8 +1,11 @@
 import { prisma } from '@/lib/prisma';
+import { getCurrentUserId } from '@/lib/auth';
 import Link from 'next/link';
 
 export async function OperationsList() {
+  const userId = await getCurrentUserId();
   const operations = await prisma.operation.findMany({
+    where: userId != null ? { userId } : {},
     orderBy: { name: 'asc' },
   });
 

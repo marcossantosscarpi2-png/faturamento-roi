@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth';
+import { getSession, getCurrentUserId } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
@@ -8,7 +8,9 @@ export async function GET() {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
+  const userId = await getCurrentUserId();
   const operations = await prisma.operation.findMany({
+    where: userId != null ? { userId } : {},
     orderBy: { name: 'asc' },
     include: {
       dailyEntries: {

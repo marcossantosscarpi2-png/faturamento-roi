@@ -2,8 +2,19 @@
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
+import { getCurrentUserId } from '@/lib/auth';
+
+async function getOperationForCurrentUser(operationId: string) {
+  const userId = await getCurrentUserId();
+  const where: { id: string; userId?: string | null } = { id: operationId };
+  if (userId != null) where.userId = userId;
+  return prisma.operation.findFirst({ where });
+}
 
 export async function createOrGetDailyEntry(operationId: string, date: Date) {
+  const op = await getOperationForCurrentUser(operationId);
+  if (!op) return null;
+
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
 
@@ -19,15 +30,19 @@ export async function createOrGetDailyEntry(operationId: string, date: Date) {
 }
 
 export async function updateDailyObservations(entryId: string, observations: string | null) {
-  await prisma.dailyEntry.update({
-    where: { id: entryId },
-    data: { observations },
-  });
   const entry = await prisma.dailyEntry.findUnique({
     where: { id: entryId },
     include: { operation: true },
   });
-  if (entry) revalidatePath(`/operacoes/${entry.operationId}`);
+  if (!entry) return { error: 'Lançamento não encontrado' };
+  const op = await getOperationForCurrentUser(entry.operationId);
+  if (!op) return { error: 'Operação não encontrada ou você não tem permissão' };
+
+  await prisma.dailyEntry.update({
+    where: { id: entryId },
+    data: { observations },
+  });
+  revalidatePath(`/operacoes/${entry.operationId}`);
   return { success: true };
 }
 
@@ -54,6 +69,8 @@ export async function createExpense(formData: FormData) {
       include: { operation: true },
     });
     if (!entry) return { error: 'Lançamento diário não encontrado' };
+    const op = await getOperationForCurrentUser(entry.operationId);
+    if (!op) return { error: 'Operação não encontrada ou você não tem permissão' };
 
     await prisma.expense.create({
       data: {
@@ -80,6 +97,9 @@ export async function updateExpense(
   formData: FormData
 ) {
   try {
+    const op = await getOperationForCurrentUser(operationId);
+    if (!op) return { error: 'Operação não encontrada ou você não tem permissão' };
+
     const category = formData.get('category') as string;
     const amountStr = formData.get('amount') as string;
     const description = (formData.get('description') as string) || null;
@@ -109,6 +129,8 @@ export async function updateExpense(
 export async function deleteExpense(id: string, operationId: string) {
   try {
     if (!id || !operationId) return { error: 'IDs inválidos' };
+    const op = await getOperationForCurrentUser(operationId);
+    if (!op) return { error: 'Operação não encontrada ou você não tem permissão' };
     await prisma.expense.delete({ where: { id } });
     revalidatePath(`/operacoes/${operationId}`);
     return { success: true };
@@ -136,6 +158,8 @@ export async function createRevenue(formData: FormData) {
       include: { operation: true },
     });
     if (!entry) return { error: 'Lançamento diário não encontrado' };
+    const op = await getOperationForCurrentUser(entry.operationId);
+    if (!op) return { error: 'Operação não encontrada ou você não tem permissão' };
 
     await prisma.revenue.create({
       data: { dailyEntryId, amount, description, time },
@@ -155,6 +179,9 @@ export async function updateRevenue(
   formData: FormData
 ) {
   try {
+    const op = await getOperationForCurrentUser(operationId);
+    if (!op) return { error: 'Operação não encontrada ou você não tem permissão' };
+
     const amountStr = formData.get('amount') as string;
     const description = (formData.get('description') as string) || null;
     const time = (formData.get('time') as string) || null;
@@ -179,6 +206,8 @@ export async function updateRevenue(
 export async function deleteRevenue(id: string, operationId: string) {
   try {
     if (!id || !operationId) return { error: 'IDs inválidos' };
+    const op = await getOperationForCurrentUser(operationId);
+    if (!op) return { error: 'Operação não encontrada ou você não tem permissão' };
     await prisma.revenue.delete({ where: { id } });
     revalidatePath(`/operacoes/${operationId}`);
     return { success: true };
@@ -191,6 +220,8 @@ export async function deleteRevenue(id: string, operationId: string) {
 export async function duplicateDay(entryId: string, operationId: string, targetDate: string) {
   try {
     if (!entryId || !operationId || !targetDate) return { error: 'Dados inválidos' };
+    const op = await getOperationForCurrentUser(operationId);
+    if (!op) return { error: 'Operação não encontrada ou você não tem permissão' };
     const entry = await prisma.dailyEntry.findUnique({
       where: { id: entryId },
       include: { expenses: true, revenues: true, operation: true },
@@ -242,6 +273,8 @@ export async function duplicateDay(entryId: string, operationId: string, targetD
 export async function deleteDailyEntry(entryId: string, operationId: string) {
   try {
     if (!entryId || !operationId) return { error: 'IDs inválidos' };
+    const op = await getOperationForCurrentUser(operationId);
+    if (!op) return { error: 'Operação não encontrada ou você não tem permissão' };
     await prisma.dailyEntry.delete({ where: { id: entryId } });
     revalidatePath(`/operacoes/${operationId}`);
     return { success: true };

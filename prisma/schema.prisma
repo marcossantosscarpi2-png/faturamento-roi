@@ -18,7 +18,8 @@ model User {
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
-  sessions Session[]
+  sessions    Session[]
+  operations  Operation[]
 
   @@map("users")
 }
@@ -36,18 +37,21 @@ model Session {
   @@map("sessions")
 }
 
-// Operação: unidade central do sistema (cada negócio/linha independente)
+// Operação: unidade central do sistema (cada negócio/linha independente). Pertence a um usuário.
 model Operation {
   id                 String   @id @default(cuid())
   name               String
   dailyBudget         Float    @map("daily_budget")
   pixAccount         String   @map("pix_account")
   expenseCategories   String?  @map("expense_categories") // JSON: [{ id, label }]
+  userId             String?  @map("user_id")
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
 
+  user         User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
   dailyEntries DailyEntry[]
 
+  @@index([userId])
   @@map("operations")
 }
 

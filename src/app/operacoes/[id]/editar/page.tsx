@@ -1,5 +1,5 @@
 import { redirect, notFound } from 'next/navigation';
-import { getSession } from '@/lib/auth';
+import { getSession, getCurrentUserId } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { OperationEditForm } from '@/components/operations/OperationEditForm';
@@ -12,9 +12,13 @@ export default async function EditarOperacaoPage({
   const session = await getSession();
   if (!session) redirect('/');
 
+  const userId = await getCurrentUserId();
   const { id } = await params;
-  const operation = await prisma.operation.findUnique({
-    where: { id },
+  const where: { id: string; userId?: string | null } = { id };
+  if (userId != null) where.userId = userId;
+
+  const operation = await prisma.operation.findFirst({
+    where,
   });
 
   if (!operation) notFound();

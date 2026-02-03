@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { getSession } from '@/lib/auth';
+import { getSession, getCurrentUserId } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getOperationStats } from '@/lib/data';
 import { formatBRL, formatROIx } from '@/lib/utils';
@@ -16,11 +16,13 @@ export default async function CompararPage({
   const session = await getSession();
   if (!session) redirect('/');
 
+  const userId = await getCurrentUserId();
   const sp = await searchParams;
   const period = sp?.period ? parseInt(sp.period, 10) : 7;
   const validPeriod = [1, 7, 15, 30].includes(period) ? period : 7;
 
   const operations = await prisma.operation.findMany({
+    where: userId != null ? { userId } : {},
     orderBy: { name: 'asc' },
   });
 

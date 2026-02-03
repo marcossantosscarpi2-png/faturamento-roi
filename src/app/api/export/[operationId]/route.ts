@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth';
+import { getSession, getCurrentUserId } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getOperationStats } from '@/lib/data';
 import * as XLSX from 'xlsx';
@@ -15,14 +15,15 @@ export async function GET(
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
+  const userId = await getCurrentUserId();
   const { operationId } = await params;
   const { searchParams } = new URL(request.url);
   const period = parseInt(searchParams.get('period') || '7', 10);
   const format = searchParams.get('format') || 'xlsx';
 
-  const operation = await prisma.operation.findUnique({
-    where: { id: operationId },
-  });
+  const opWhere: { id: string; userId?: string | null } = { id: operationId };
+  if (userId != null) opWhere.userId = userId;
+  const operation = await prisma.operation.findFirst({ where: opWhere });
   if (!operation) {
     return NextResponse.json({ error: 'Operação não encontrada' }, { status: 404 });
   }

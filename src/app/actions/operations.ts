@@ -2,9 +2,11 @@
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
+import { getCurrentUserId } from '@/lib/auth';
 import { getExpenseCategories } from '@/lib/expenseCategories';
 
 export async function createOperation(formData: FormData) {
+  const userId = await getCurrentUserId();
   const name = formData.get('name') as string;
   const dailyBudget = parseFloat((formData.get('dailyBudget') as string) || '0');
   const pixAccount = formData.get('pixAccount') as string;
@@ -18,6 +20,7 @@ export async function createOperation(formData: FormData) {
       name,
       dailyBudget,
       pixAccount,
+      ...(userId != null && { userId }),
     },
   });
 
@@ -26,6 +29,7 @@ export async function createOperation(formData: FormData) {
 }
 
 export async function updateOperation(id: string, formData: FormData) {
+  const userId = await getCurrentUserId();
   const name = formData.get('name') as string;
   const dailyBudget = parseFloat((formData.get('dailyBudget') as string) || '0');
   const pixAccount = formData.get('pixAccount') as string;
@@ -36,6 +40,12 @@ export async function updateOperation(id: string, formData: FormData) {
   if (!name || !pixAccount) {
     return { error: 'Nome e conta PIX são obrigatórios' };
   }
+
+  const where: { id: string; userId?: string | null } = { id };
+  if (userId != null) where.userId = userId;
+
+  const op = await prisma.operation.findFirst({ where });
+  if (!op) return { error: 'Operação não encontrada ou você não tem permissão' };
 
   await prisma.operation.update({
     where: { id },
@@ -48,6 +58,13 @@ export async function updateOperation(id: string, formData: FormData) {
 }
 
 export async function deleteOperation(id: string) {
+  const userId = await getCurrentUserId();
+  const where: { id: string; userId?: string | null } = { id };
+  if (userId != null) where.userId = userId;
+
+  const op = await prisma.operation.findFirst({ where });
+  if (!op) return { error: 'Operação não encontrada ou você não tem permissão' };
+
   await prisma.operation.delete({ where: { id } });
   revalidatePath('/');
   return { success: true };
@@ -57,8 +74,12 @@ export async function addExpenseCategory(operationId: string, label: string) {
   const trimmed = (label || '').trim();
   if (!trimmed) return { error: 'Nome da categoria é obrigatório' };
 
-  const operation = await prisma.operation.findUnique({ where: { id: operationId } });
-  if (!operation) return { error: 'Operação não encontrada' };
+  const userId = await getCurrentUserId();
+  const where: { id: string; userId?: string | null } = { id: operationId };
+  if (userId != null) where.userId = userId;
+
+  const operation = await prisma.operation.findFirst({ where });
+  if (!operation) return { error: 'Operação não encontrada ou você não tem permissão' };
 
   const current = getExpenseCategories(operation);
   const existingIds = new Set(current.map((c) => c.id));
